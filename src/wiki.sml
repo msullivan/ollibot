@@ -126,7 +126,7 @@ structure Wiki = struct
             end
           | "'" :: "'" :: "'" :: cs =>
             let in
-              case split ["'", "'", ","] cs of
+              case split ["'", "'", "'"] cs of
                 NONE => raise Wikify "No matching `" 
               | SOME(bold,cs) => 
                 let val bold = wikify bold
