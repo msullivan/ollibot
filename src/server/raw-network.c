@@ -273,17 +273,18 @@ int ml_accept(int l) {
   struct sockaddr remote;
   int sin_size = sizeof (struct sockaddr_in);
   int e = 0;
-  sigset_t blockme;
+  sigset_t old, new;
 
-
-  if (sigfillset(&blockme))
-    return -1;
-  if (sigprocmask(SIG_BLOCK, &blockme, NULL))
-    return -1;
+  if (sigemptyset(&new))
+      return -1;
+  if (sigaddset(&new, SIGPIPE))
+      return -1;
+  if (sigprocmask(SIG_BLOCK, &new, &old))
+      return -1;
   if ((e = accept(l, (struct sockaddr*)&remote, &sin_size)) == -1)
     printf("ACCEPT ERROR: %s\n", strerror(errno));
-  if (sigprocmask(SIG_UNBLOCK, &blockme, NULL))
-    return -1;
+  if (sigprocmask(SIG_BLOCK, &old, NULL))
+      return -1;
 
   fcntl(e, F_SETFD, 1); /* don't keep open across exec */
 
