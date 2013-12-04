@@ -22,9 +22,7 @@ structure OllibotWebHandler :> WEB_HANDLER = struct
 
   val header = 
    fn title => 
-( "<html><head><title>Ollibot: " ^ title ^ "</title></head>\n"
-^ "<body>\n"
-^ "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 ^ "<!DOCTYPE html \n"
 ^ "     PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n"
 ^ "     \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n"
@@ -32,8 +30,8 @@ structure OllibotWebHandler :> WEB_HANDLER = struct
 ^ "\n"
 ^ "<head>\n"
 ^ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
-^ "<title>Tiny Ollibot Example Server - Call-by-need functions</title>\n"
-^ "<link rel=\"stylesheet\" type=\"text/css\" href=\"/ollibot.css\" media=\"screen,projection\" />\n"
+^ "<title>Ollibot: " ^ title ^ "</title>\n"
+^ "<link rel=\"stylesheet\" type=\"text/css\" href=\"/ollibot.css\" />\n"
 ^ "</head>\n" 
 ^ "\n"  
 ^ "<body>\n"
@@ -41,13 +39,16 @@ structure OllibotWebHandler :> WEB_HANDLER = struct
 
   fun get_title content = 
       let
+        val special = String.explode "%=-{}"
+        fun isSpecial c = List.exists (fn c' => c = c') special
+
         val content =
             StringUtil.losespecl
-                (fn #"%" => true | #"=" => true | c => StringUtil.whitespec c)
+                (fn c => isSpecial c orelse StringUtil.whitespec c)
                 content
         val (title,_) =
             StringUtil.token
-                (fn #"%" => true | #"=" => true | #"\n" => true | _ => false)
+                (fn c => isSpecial c orelse c = #"\n")
                 content
       in StringUtil.trim title end
 
